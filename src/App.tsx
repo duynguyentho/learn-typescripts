@@ -1,24 +1,45 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useEffect, useState } from 'react';
 import './App.css';
+import axios from 'axios';
+import PokemonCollection from './components/PokemonCollection';
+import { Pokemon, Pokemons } from './interface';
 
-function App() {
+
+
+const BASE_URL:string = 'https://pokeapi.co/api/v2/pokemon';
+
+// https://pokeapi.co/api/v2/pokemon?limit=20&offset=20
+const printSomething:() => number = () => { 
+  console.log('hello');
+    return 1;
+ }
+const App:React.FC = () => {
+  const [pokemons, setPokemons] = useState<Pokemon[]>([]);
+
+  useEffect(() => {
+    const listPokemon = async() => {
+      const res = await axios.get(`${BASE_URL}?limit=20&offset=20`);
+      // console.log(res.data.results);
+      
+      res.data.results.forEach(async (pokemon:Pokemons) => {
+        // console.log(1);
+        
+        let pkm = await axios.get(`${BASE_URL}/${pokemon.name}`);
+        setPokemons(p => [...p, pkm.data]);
+        
+      })
+      
+    }
+
+    listPokemon()
+  }, [])
+  
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+        <div className="container">
+          <header className="pokemon-header">Pokemon</header>
+          <PokemonCollection pokemons={pokemons}/>
+        </div>
     </div>
   );
 }
